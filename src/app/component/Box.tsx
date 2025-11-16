@@ -2,6 +2,7 @@
 
 import { useDraggable } from "@neodrag/react";
 import { useRef, useState, useEffect } from "react";
+import Buttons from "./Buttons";
 
 const Box = () => {
   // 드래그 대상 요소의 Ref
@@ -10,6 +11,8 @@ const Box = () => {
   // 크기 조절 input Ref
   const widthInputRef = useRef<HTMLInputElement>(null);
   const heightInputRef = useRef<HTMLInputElement>(null);
+  const [imagePaths, setImagePaths] = useState([]);
+  const [currentImageSrc, setCurrentImageSrc] = useState("");
 
   // 드래그 기능 활성화
   useDraggable(draggableRef);
@@ -18,6 +21,7 @@ const Box = () => {
   const [currentWidth, setCurrentWidth] = useState(200);
   const [currentHeight, setCurrentHeight] = useState(200);
   const [isHandleOpen, setHandleOpen] = useState(false);
+  const [isListOpen, setListOpen] = useState(false);
 
   const handleSizeChange = () => {
     const newWidth = widthInputRef.current
@@ -34,11 +38,12 @@ const Box = () => {
       setCurrentHeight(newHeight);
     }
   };
+  const handleImageChange = () => {
+    if (imagePaths.length === 0) return; // 목록이 없으면 종료
 
-  const [imagePaths, setImagePaths] = useState([]);
-  // 💡 현재 표시할 이미지 경로
-  const [currentImageSrc, setCurrentImageSrc] = useState("");
-
+    const randomIndex = Math.floor(Math.random() * imagePaths.length);
+    setCurrentImageSrc(imagePaths[randomIndex]);
+  };
   useEffect(() => {
     async function fetchImages() {
       try {
@@ -57,14 +62,6 @@ const Box = () => {
     }
     fetchImages();
   }, []); // 마운트 시 한 번만 실행
-
-  // 💡 2. 랜덤 이미지 선택 로직 수정
-  const handleImageChange = () => {
-    if (imagePaths.length === 0) return; // 목록이 없으면 종료
-
-    const randomIndex = Math.floor(Math.random() * imagePaths.length);
-    setCurrentImageSrc(imagePaths[randomIndex]);
-  };
 
   return (
     <div
@@ -86,40 +83,45 @@ const Box = () => {
             <span>이미지 로딩 중...</span>
           )}
         </div>
-        {/* 버튼들 */}
-        <div className="flex px-3 py-1 bg-black text-[0.7rem] text-white ">
-          <button onClick={handleImageChange}>다른 랜덤 이미지</button>
-
-          <button onClick={() => setHandleOpen(!isHandleOpen)}>
-            {isHandleOpen ? "크기 숨기기" : "크기 설정"}
-          </button>
-        </div>
-
-        {isHandleOpen && (
-          <div className="flex space-x-2">
-            <label className="flex items-center space-x-1 text-sm">
-              <span>W</span>
-              <input
-                type="number"
-                ref={widthInputRef as React.RefObject<HTMLInputElement>}
-                onChange={handleSizeChange} // 값이 변경될 때마다 크기 변경
-                defaultValue={currentWidth}
-                className="w-16 border px-1"
-              />
-            </label>
-            <div className="flex items-center space-x-1 text-sm">
-              <span>H</span>
-              <input
-                type="number"
-                ref={heightInputRef as React.RefObject<HTMLInputElement>}
-                onChange={handleSizeChange} // 값이 변경될 때마다 크기 변경
-                defaultValue={currentHeight}
-                className="w-16 border px-1"
-              />
-            </div>
-          </div>
-        )}
+        <Buttons
+          handleImageChange={handleImageChange}
+          isHandleOpen={isHandleOpen}
+          isListOpen={isListOpen}
+          setHandleOpen={setHandleOpen}
+          setListOpen={setListOpen}
+        />
       </div>
+
+      {isHandleOpen && (
+        <div className="flex space-y-2 flex-col items-start bg-black text-white">
+          <div className="flex items-center space-x-1 text-sm">
+            <div className="w-10">width</div>
+            <input
+              type="number"
+              ref={widthInputRef as React.RefObject<HTMLInputElement>}
+              onChange={handleSizeChange} // 값이 변경될 때마다 크기 변경
+              defaultValue={currentWidth}
+              className="w-16 border"
+            />
+          </div>
+          <div className="flex items-center space-x-1 text-sm">
+            <div className="w-10">height</div>
+            <input
+              type="number"
+              ref={heightInputRef as React.RefObject<HTMLInputElement>}
+              onChange={handleSizeChange} // 값이 변경될 때마다 크기 변경
+              defaultValue={currentHeight}
+              className="w-16 border"
+            />
+          </div>
+        </div>
+      )}
+
+      {isListOpen ?? (
+        <div className="h-full w-[300px] cursor-pointer relative backdrop-blur-sm overflow-y-auto flex flex-col py-12">
+          목록
+        </div>
+      )}
     </div>
   );
 };
