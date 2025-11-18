@@ -57,7 +57,7 @@ const Box = ({ imagePaths, randomKey }: BoxProps) => {
     >
       <div className="flex flex-col items-center space-y-4">
         <div
-          className="backdrop-blur-sm flex items-center justify-center text-sm"
+          className="flex items-center justify-center text-sm"
           style={{ width: currentWidth, height: currentHeight }}
         >
           {currentImageSrc ? (
